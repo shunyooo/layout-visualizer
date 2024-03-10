@@ -3,6 +3,7 @@
   "files.exclude": {
     "**/__pycache__": true,
     "**/.ipynb_checkpoints": true,
+    "**/.ruff_cache": true,
   },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
