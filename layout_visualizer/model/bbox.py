@@ -57,6 +57,15 @@ class BBox(BaseModel):
             y2=self.y2 + top + bottom,
         )
 
+    def is_collision(self, other: "BBox") -> bool:
+        """Check collision with other BBox"""
+        return not (
+            self.x2 < other.x1
+            or self.x1 > other.x2
+            or self.y2 < other.y1
+            or self.y1 > other.y2
+        )
+
     def __repr__(self):
         return (
             f"{self.__class__.__name__}(x1={self.x1}, y1={self.y1},"

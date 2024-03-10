@@ -1,5 +1,5 @@
 import os
-from typing import Callable
+from typing import Callable, Literal
 
 from PIL import Image as _Image
 from PIL import ImageDraw, ImageFont
@@ -21,6 +21,7 @@ FONT_FILE = "NotoSansJP-Medium.ttf"
 
 Color = tuple[int, int, int] | tuple[int, int, int, int] | str | int
 ColorMap = Callable[[str], Color] | dict[str, Color] | None
+AvoidLabelTo = Literal["right", "bottom"]
 
 
 # NOTE: Sub functions
@@ -33,23 +34,42 @@ def _draw_textbox(
     font: PILImageFont,
     bg_color: Color,
     font_color: Color,
-    padding: tuple[float, float, float, float] = (0, 0, 0, 0),
-) -> None:
+    padding: tuple[float, float, float, float],
+    avoid_bboxes: list[BBox],
+    avoid_to: AvoidLabelTo,
+) -> BBox:
     """Draw textbox with color background."""
-    text_bbox = BBox.from_xywh(xy, get_textsize(text, font)).shift(
+    content_bbox = BBox.from_xywh(xy, get_textsize(text, font)).shift(
         x=padding[0], y=padding[1]
     )
     text_font_offset = get_font_offset(font, text)
-    bg_bbox = text_bbox.pad(right=padding[2], bottom=padding[3])
+    bg_bbox = content_bbox.pad(right=padding[2], bottom=padding[3])
+
+    for avoid_bbox in avoid_bboxes:
+        # shift bbox if duplicate position
+        if bg_bbox.is_collision(avoid_bbox):
+            print(f"Collision: {bg_bbox} and {avoid_bbox}")
+            if avoid_to == "right":
+                _diff = avoid_bbox.x2 - bg_bbox.x1
+                bg_bbox = bg_bbox.shift(x=_diff)
+                content_bbox = content_bbox.shift(x=_diff)
+            elif avoid_to == "bottom":
+                _diff = avoid_bbox.y2 - bg_bbox.y1
+                bg_bbox = bg_bbox.shift(y=_diff)
+                content_bbox = content_bbox.shift(y=_diff)
+            else:
+                raise ValueError(f"Invalid avoid_position: {avoid_to}")
+
     draw.rectangle(bg_bbox.x1y1x2y2, fill=bg_color)
     draw.text(
-        text_bbox.shift(y=-text_font_offset).x1y1,  # remove offset
+        content_bbox.shift(y=-text_font_offset).x1y1,  # remove offset
         text,
         fill=font_color,
         font=font,
         spacing=0,
         align="left",
     )
+    return bg_bbox
 
 
 def _to_color_map_func(
@@ -72,12 +92,14 @@ def _draw_labeled_bbox(
     bg_color: Color,
     font: PILImageFont,
     line_width: int,
-) -> None:
+    avoid_text_bboxes: list[BBox],
+    avoid_to: AvoidLabelTo,
+) -> tuple[BBox, BBox]:
     """Draw label text and bbox rectangle."""
     bbox_image = _Image.new("RGBA", image.size)
     draw = ImageDraw.Draw(bbox_image)
     draw.rectangle(bbox.x1y1x2y2, outline=bg_color, width=line_width)
-    _draw_textbox(
+    text_bbox = _draw_textbox(
         draw,
         label,
         bbox.x1y1,
@@ -85,8 +107,11 @@ def _draw_labeled_bbox(
         bg_color,
         font_color="white",  # TODO: make it customizable
         padding=(line_width, line_width, line_width, line_width),
+        avoid_bboxes=avoid_text_bboxes,
+        avoid_to=avoid_to,
     )
     image.alpha_composite(bbox_image)
+    return bbox, text_bbox
 
 
 def _load_font(font_size: int) -> PILImageFont:
@@ -105,6 +130,7 @@ def draw_label_bboxes(
     bg_color_map: ColorMap = None,
     font_size: int = 10,
     line_width: int = 2,
+    avoid_label_to: AvoidLabelTo = "right",
 ) -> PILImage:
     """Draw labeled bounding boxes on image.
 
@@ -124,14 +150,18 @@ def draw_label_bboxes(
         PILImage: Image with labeled bounding boxes.
     """
     image = image.copy()
+    avoid_text_bboxes = []
     for label_bbox in label_bboxes:
         label, bbox = label_bbox
-        _draw_labeled_bbox(
+        _, text_bbox = _draw_labeled_bbox(
             image,
             label,
             BBox.from_x1y1x2y2(bbox),
             bg_color=_to_color_map_func(bg_color_map)(label),
             font=_load_font(font_size),
             line_width=line_width,
+            avoid_text_bboxes=avoid_text_bboxes,
+            avoid_to=avoid_label_to,
         )
+        avoid_text_bboxes.append(text_bbox)
     return image
