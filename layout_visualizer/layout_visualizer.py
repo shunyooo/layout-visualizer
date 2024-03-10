@@ -48,7 +48,6 @@ def _draw_textbox(
     for avoid_bbox in avoid_bboxes:
         # shift bbox if duplicate position
         if bg_bbox.is_collision(avoid_bbox):
-            print(f"Collision: {bg_bbox} and {avoid_bbox}")
             if avoid_to == "right":
                 _diff = avoid_bbox.x2 - bg_bbox.x1
                 bg_bbox = bg_bbox.shift(x=_diff)
