@@ -1,0 +1,37 @@
+{
+  // common settings
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.ipynb_checkpoints": true,
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.ipynb_checkpoints/**": true,
+    "**/.venv/**": true,
+    "**/data/**": true,
+  },
+  // interpreter settings
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  // editor settings
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.autoSearchPaths": false,
+  "python.analysis.extraPaths": [
+    "./",
+  ],
+  "python.analysis.indexing": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit",
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+  },
+  // jupyter settings
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "notebook.formatOnSave.enabled": true,
+}
