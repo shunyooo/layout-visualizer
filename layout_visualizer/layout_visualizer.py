@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Literal
+from typing import Callable, Literal, Mapping
 
 from PIL import Image as _Image
 from PIL import ImageDraw, ImageFont
@@ -20,7 +20,7 @@ FONT_FILE = "NotoSansJP-Medium.ttf"
 # NOTE: Types
 
 Color = tuple[int, int, int] | tuple[int, int, int, int] | str | int
-ColorMap = Callable[[str], Color] | dict[str, Color] | None
+ColorMap = Callable[[str], Color] | Mapping[str, Color] | None
 AvoidLabelTo = Literal["right", "bottom"]
 
 
@@ -75,13 +75,16 @@ def _to_color_map_func(
     color_map: ColorMap,
 ) -> Callable[[str], Color]:
     """Convert color_map to function."""
+
+    def default_func(label: str):
+        return text_to_color(label, alpha=0.7)
+
     if isinstance(color_map, dict):
-        return lambda label: color_map[label]
+        return lambda label: color_map.get(label, default_func(label))
     elif callable(color_map):
         return color_map
     else:
-        # Default color map
-        return lambda label: text_to_color(label, alpha=0.7)
+        return default_func
 
 
 def _draw_labeled_bbox(
@@ -148,15 +151,16 @@ def draw_label_bboxes(
     Returns:
         PILImage: Image with labeled bounding boxes.
     """
-    image = image.copy()
+    image = image.copy().convert("RGBA")
     avoid_text_bboxes = []
+    bg_color_map = _to_color_map_func(bg_color_map)
     for label_bbox in label_bboxes:
         label, bbox = label_bbox
         _, text_bbox = _draw_labeled_bbox(
             image,
             label,
             BBox.from_x1y1x2y2(bbox),
-            bg_color=_to_color_map_func(bg_color_map)(label),
+            bg_color=bg_color_map(label),
             font=_load_font(font_size),
             line_width=line_width,
             avoid_text_bboxes=avoid_text_bboxes,
