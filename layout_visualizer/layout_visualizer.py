@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Literal, Mapping
+from typing import Callable, List, Literal, Mapping, Optional, Tuple, Union
 
 from PIL import Image as _Image
 from PIL import ImageDraw, ImageFont
@@ -19,8 +19,8 @@ FONT_FILE = "NotoSansJP-Medium.ttf"
 
 # NOTE: Types
 
-Color = tuple[int, int, int] | tuple[int, int, int, int] | str | int
-ColorMap = Callable[[str], Color] | Mapping[str, Color] | None
+Color = Union[Tuple[int, int, int], Tuple[int, int, int, int], str, int]
+ColorMap = Optional[Union[Callable[[str], Color], Mapping[str, Color]]]
 AvoidLabelTo = Literal["right", "bottom"]
 
 
@@ -30,12 +30,12 @@ AvoidLabelTo = Literal["right", "bottom"]
 def _draw_textbox(
     draw: PILImageDraw,
     text: str,
-    xy: tuple[float, float],
+    xy: Tuple[float, float],
     font: PILImageFont,
     bg_color: Color,
     font_color: Color,
-    padding: tuple[float, float, float, float],
-    avoid_bboxes: list[BBox],
+    padding: Tuple[float, float, float, float],
+    avoid_bboxes: List[BBox],
     avoid_to: AvoidLabelTo,
 ) -> BBox:
     """Draw textbox with color background."""
@@ -94,9 +94,9 @@ def _draw_labeled_bbox(
     bg_color: Color,
     font: PILImageFont,
     line_width: int,
-    avoid_text_bboxes: list[BBox],
+    avoid_text_bboxes: List[BBox],
     avoid_to: AvoidLabelTo,
-) -> tuple[BBox, BBox]:
+) -> Tuple[BBox, BBox]:
     """Draw label text and bbox rectangle."""
     bbox_image = _Image.new("RGBA", image.size)
     draw = ImageDraw.Draw(bbox_image)
@@ -128,7 +128,7 @@ def _load_font(font_size: int) -> PILImageFont:
 
 def draw_label_bboxes(
     image: PILImage,
-    label_bboxes: list[tuple[str, tuple[float, float, float, float]]],
+    label_bboxes: List[Tuple[str, Tuple[float, float, float, float]]],
     bg_color_map: ColorMap = None,
     font_size: int = 10,
     line_width: int = 2,
@@ -139,7 +139,7 @@ def draw_label_bboxes(
     Args:
         image (PILImage):
                      Pillow image.
-        label_bboxes (list[tuple[str, tuple[float, float, float, float]]]):
+        label_bboxes (List[Tuple[str, Tuple[float, float, float, float]]]):
                      List of label and bbox(x_min, y_min, x_max, y_max).
         bg_color_map (ColorMap, optional):
                      Background Color Map. Defaults is generated from label hash.

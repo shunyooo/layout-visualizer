@@ -1,0 +1,32 @@
+name: Test Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry 
+          poetry install
+      - name: Lint with Ruff
+        run: |
+          poetry run ruff check --output-format=github .
+          poetry run ruff format . --check --diff       
+      - name: Run tests
+        run: poetry run pytest

@@ -1,6 +1,8 @@
+from typing import Tuple, Union
+
 from pydantic import BaseModel
 
-numeric = int | float
+numeric = Union[int, float]
 
 
 class BBox(BaseModel):
@@ -10,26 +12,26 @@ class BBox(BaseModel):
     y2: float
 
     @property
-    def x1y1(self) -> tuple[float, float]:
+    def x1y1(self) -> Tuple[float, float]:
         return (self.x1, self.y1)
 
     @property
-    def x1y1x2y2(self) -> tuple[float, float, float, float]:
+    def x1y1x2y2(self) -> Tuple[float, float, float, float]:
         return (self.x1, self.y1, self.x2, self.y2)
 
     @property
-    def wh(self) -> tuple[float, float]:
+    def wh(self) -> Tuple[float, float]:
         return (self.x2 - self.x1, self.y2 - self.y1)
 
     @staticmethod
-    def from_x1y1x2y2(x1y1x2y2: tuple[numeric, numeric, numeric, numeric]) -> "BBox":
-        """Create BBox from tuple (x1, y1, x2, y2)"""
+    def from_x1y1x2y2(x1y1x2y2: Tuple[numeric, numeric, numeric, numeric]) -> "BBox":
+        """Create BBox from Tuple (x1, y1, x2, y2)"""
         x1, y1, x2, y2 = [float(v) for v in x1y1x2y2]
         return BBox(x1=x1, y1=y1, x2=x2, y2=y2)
 
     @staticmethod
-    def from_xywh(x1y1: tuple[numeric, numeric], wh: tuple[numeric, numeric]) -> "BBox":
-        """Create BBox from tuple (x1, y1) and (w, h)"""
+    def from_xywh(x1y1: Tuple[numeric, numeric], wh: Tuple[numeric, numeric]) -> "BBox":
+        """Create BBox from Tuple (x1, y1) and (w, h)"""
         x1, y1, w, h = [float(v) for v in x1y1 + wh]
         return BBox(x1=x1, y1=y1, x2=x1 + w, y2=y1 + h)
 
