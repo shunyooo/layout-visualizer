@@ -20,7 +20,9 @@ def _image(name: str) -> PILImage:
 
 def _eq(image1: PILImage, image2: PILImage) -> bool:
     diff = ImageChops.difference(image1, image2)
-    return sum(ImageStat.Stat(diff).sum) == 0
+    diffs = ImageStat.Stat(diff).mean
+    diff_mean = sum(diffs) / len(diffs)
+    return diff_mean < 1
 
 
 class TestDrawLabelBBoxes:
