@@ -1,4 +1,5 @@
 import os
+from typing import List, Tuple
 
 import pytest
 from PIL import Image as _Image
@@ -29,7 +30,7 @@ class TestDrawLabelBBoxes:
         assert result == image
 
     def test_normal_multi_labels(self, image: PILImage):
-        label_bboxes: list[tuple[str, tuple]] = [
+        label_bboxes: List[Tuple[str, Tuple]] = [
             ("Label 1", (10, 10, 50, 50)),
             ("Label 2", (30, 30, 140, 100)),
         ]
@@ -37,7 +38,7 @@ class TestDrawLabelBBoxes:
         assert _eq(result, _image("multi_labels"))
 
     def test_normal_multi_labels_avoid_right(self, image: PILImage):
-        label_bboxes: list[tuple[str, tuple]] = [
+        label_bboxes: List[Tuple[str, Tuple]] = [
             ("Label 1", (10, 10, 50, 50)),
             ("Label 2", (10, 10, 140, 100)),
         ]
@@ -45,7 +46,7 @@ class TestDrawLabelBBoxes:
         assert _eq(result, _image("multi_labels_avoid_right"))
 
     def test_normal_multi_labels_avoid_bottom(self, image: PILImage):
-        label_bboxes: list[tuple[str, tuple]] = [
+        label_bboxes: List[Tuple[str, Tuple]] = [
             ("Label 1", (10, 10, 50, 50)),
             ("Label 2", (10, 10, 140, 100)),
         ]
@@ -53,7 +54,7 @@ class TestDrawLabelBBoxes:
         assert _eq(result, _image("multi_labels_avoid_bottom"))
 
     def test_multi_labels_color_map_dict(self, image: PILImage):
-        label_bboxes: list[tuple[str, tuple]] = [
+        label_bboxes: List[Tuple[str, Tuple]] = [
             ("Label 1", (10, 10, 50, 50)),
             ("Label 2", (30, 30, 140, 100)),
         ]
@@ -61,7 +62,7 @@ class TestDrawLabelBBoxes:
         assert _eq(result, _image("multi_labels_color_map_dict"))
 
     def multi_labels_color_map_func(self, image: PILImage):
-        label_bboxes: list[tuple[str, tuple]] = [
+        label_bboxes: List[Tuple[str, Tuple]] = [
             ("Label 1", (10, 10, 50, 50)),
             ("Label 2", (30, 30, 140, 100)),
         ]
