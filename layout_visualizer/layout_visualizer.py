@@ -130,8 +130,8 @@ def draw_label_bboxes(
     image: PILImage,
     label_bboxes: List[Tuple[str, Tuple[float, float, float, float]]],
     bg_color_map: ColorMap = None,
-    font_size: int | None = None,
-    line_width: int | None = None,
+    font_size: Optional[int] = None,
+    line_width: Optional[int] = None,
     avoid_label_to: AvoidLabelTo = "bottom",
 ) -> PILImage:
     """Draw labeled bounding boxes on image.
