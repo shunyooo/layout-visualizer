@@ -130,9 +130,9 @@ def draw_label_bboxes(
     image: PILImage,
     label_bboxes: List[Tuple[str, Tuple[float, float, float, float]]],
     bg_color_map: ColorMap = None,
-    font_size: int = 10,
-    line_width: int = 2,
-    avoid_label_to: AvoidLabelTo = "right",
+    font_size: int | None = None,
+    line_width: int | None = None,
+    avoid_label_to: AvoidLabelTo = "bottom",
 ) -> PILImage:
     """Draw labeled bounding boxes on image.
 
@@ -154,6 +154,12 @@ def draw_label_bboxes(
     image = image.copy().convert("RGBA")
     avoid_text_bboxes = []
     bg_color_map = _to_color_map_func(bg_color_map)
+
+    if font_size is None:
+        font_size = max(image.width // 50, 10)
+    if line_width is None:
+        line_width = max(image.width // 220, 2)
+
     for label_bbox in label_bboxes:
         label, bbox = label_bbox
         _, text_bbox = _draw_labeled_bbox(
